@@ -1,0 +1,130 @@
+
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style>
+			body {
+				background-color: #ffffff;
+				margin: 0;
+				overflow: hidden;
+			}
+		</style>
+	</head>
+	<body>
+		
+		<script src="http://brangerbriz.net/labs/threejs_playGnd/js/three.min.js"></script>
+		<script src="http://brangerbriz.net/labs/threejs_playGnd/js/Detector.js"></script>
+		<script src="http://threejs.org/examples/fonts/helvetiker_bold.typeface.js"></script>
+    <script src="http://threejs.org/examples/fonts/helvetiker_regular.typeface.js"></script>
+		<script>
+
+
+			if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			
+			var camera, scene, renderer;
+			var geometry, material, mesh;
+
+			function setup() {
+
+				var W = window.innerWidth, H = window.innerHeight;
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( W, H );
+				document.body.appendChild( renderer.domElement );
+
+				camera = new THREE.PerspectiveCamera( 50, W/H, 1, 10000 );
+				camera.position.z = 500;
+
+				scene = new THREE.Scene();
+				
+				
+				geometry = new THREE.Geometry();
+				for ( i = 0; i < 5000; i ++ ) {
+					var vertex = new THREE.Vector3();
+					vertex.x = 1000 * Math.random() - 500;
+					vertex.y = 1000 * Math.random() - 500;
+					vertex.z = 1000 * Math.random() - 500;
+					geometry.vertices.push( vertex );
+				}
+				material = new THREE.ParticleBasicMaterial( { size: 20, 
+					sizeAttenuation: false, 
+					transparent: true,
+					map: THREE.ImageUtils.loadTexture(
+      "images/particle.png")
+       	} );
+				material.color.setHex( 0xff00ff );
+				particles = new THREE.ParticleSystem( geometry, material );
+				particles.sortParticles = true;
+				scene.add( particles );
+
+				bg = document.body.style;
+				bg.background = '#000';
+ 
+			
+				var theText = "Watch Me...";
+				var hash = document.location.hash.substr( 1 );
+				if ( hash.length !== 0 ) { theText = hash; }
+				text3d = new THREE.TextGeometry( theText, {
+					size: 70,
+					height: 70,
+					curveSegments: 2,
+					font: "helvetiker",
+					weight: "bold"
+				});
+				text3d.computeBoundingBox();
+				var centerOffset = -0.5 * ( text3d.boundingBox.max.x - text3d.boundingBox.min.x );
+				var textMaterial = new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: 0xe63333, ambient: 0xffffff, emissive: 0x000000, specular: 0x111111, shininess: 30});
+				text = new THREE.Mesh( text3d, textMaterial );
+				text.position.x = centerOffset;
+				text.position.y = -20;
+				text.position.z = 500;
+				text.rotation.x = 0;
+				text.rotation.y = Math.PI * 2;
+				parent = new THREE.Object3D();
+				parent.add( text );
+				scene.add( parent );
+
+				directionalLight = new THREE.DirectionalLight(0xffffff, 0.88);
+				directionalLight.position.set( 1.45, 1, 0.79 );
+
+				directionalLight.castShadow = true;
+				scene.fog = new THREE.Fog( 0x000, 1, 2000 );
+				scene.add( directionalLight );
+
+			}
+
+			function draw() {
+
+				requestAnimationFrame( draw );
+				
+					/* -------------------------------------- 
+		       		try moving spinning your particles around
+		       		add the code below to your draw() function
+		        	-------------------------------------- */
+ 
+				particles.rotation.x = Date.now() * 0.0005;
+				particles.rotation.y = Date.now() * 0.0005;
+				particles.rotation.z = Date.now() * 0.0005;
+
+				text.position.z -= 2;
+ 
+				/* -------------------------------------- 
+		       		try oscillating the hue of your particles
+		       		add the code below to your draw() function
+		        	-------------------------------------- */
+ 
+				var time = Date.now() * 0.0005;
+				h = ( 360 * ( 1.0 + time ) % 360 ) / 360;
+				// material.color.setHSL( h, 0.5, 0.5 );
+				
+
+				renderer.render( scene, camera );
+
+			}
+
+			setup();
+			draw();
+
+		</script>
+		
+	</body>
+</html>

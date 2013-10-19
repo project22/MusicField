@@ -1,0 +1,96 @@
+  <!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+      .col {
+        float: left;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="timeDiff" class="col">time dif</div>
+    <div id="container"></div>
+    <script src="js/three.js"></script>
+    <script src="js/jquery.js"></script>
+    <script defer="defer">
+      // revolutions per second
+      var angularSpeed = 0.2; 
+      var lastTime = 0;
+ 
+      // this function is executed on each animation frame
+      function animate(){
+        // update
+        var time = (new Date()).getTime();
+        var timeDiff = time - lastTime;
+        $("#timeDiff").html(timeDiff + "<br>")
+        var angleChange = angularSpeed * timeDiff * 2 * Math.PI / 1000;
+        plane.rotation.z += angleChange;
+        lastTime = time;
+ 
+        // render
+        renderer.render(scene, camera);
+ 
+        // request new frame
+        requestAnimationFrame(function(){
+            animate();
+        });
+      }
+
+      // renderer
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(800,700);
+      $("#container").append(renderer.domElement);
+ 
+      // camera
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.y = -450;
+      camera.position.z = 400;
+      camera.rotation.x = 45 * (Math.PI / 180);
+ 
+      // scene
+      var scene = new THREE.Scene();
+ 
+      // plane
+      var plane = new THREE.Mesh(new THREE.PlaneGeometry(300, 300), new THREE.MeshNormalMaterial());
+      // plane.overdraw = true;
+      plane.castShadow = true;
+      plane.receiveShadow = true;
+      scene.add(plane);
+
+      var box = new THREE.Mesh(new THREE.CubeGeometry(100, 100, 100), new THREE.MeshLambertMaterial(
+    {
+      color: 0xCC0000
+    }));
+      // box.overdraw = true;
+      box.castShadow = true;
+      box.receiveShadow = true;
+
+
+      scene.add(box);
+
+      // box.position.y = 200;
+
+      // create a point light
+      var pointLight =
+        new THREE.SpotLight(0xFFFFFF);
+
+      // set its position
+      pointLight.position.x = 00;
+      pointLight.position.y = 00;
+      pointLight.position.z = 30;
+      pointLight.rotation.z = 2;
+      pointLight.castShadow = true;
+      pointLight.shadowCameraVisible = true;
+
+      // add to the scene
+      scene.add(pointLight);
+ 
+      // start animation
+      animate();
+    </script>
+  </body>
+</html>

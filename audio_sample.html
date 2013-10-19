@@ -1,0 +1,106 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <style>
+      body {
+        margin: 0px;
+        padding: 0px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="container"></div>
+    <script src="js/three.js"></script>
+    <script defer="defer">
+       // create the audio context (chrome only for now)
+      var context = new webkitAudioContext();
+      var audioBuffer;
+      var sourceNode;
+   
+      // load the sound
+      setupAudioNodes();
+      loadSound("audio/song.mp3");
+   
+      function setupAudioNodes() {
+          // create a buffer source node
+          sourceNode = context.createBufferSource();
+          // and connect to destination
+          sourceNode.connect(context.destination);
+      }
+   
+      // load the specified sound
+      function loadSound(url) {
+          var request = new XMLHttpRequest();
+          request.open('GET', url, true);
+          request.responseType = 'arraybuffer';
+   
+          // When loaded decode the data
+          request.onload = function() {
+   
+              // decode the data
+              context.decodeAudioData(request.response, function(buffer) {
+                  // when the audio is decoded play the sound
+                  playSound(buffer);
+              }, onError);
+          }
+          request.send();
+      }
+   
+   
+      function playSound(buffer) {
+          sourceNode.buffer = buffer;
+          sourceNode.noteOn(0);
+      }
+   
+      // log if an error occurs
+      function onError(e) {
+          console.log(e);
+      }
+
+
+
+
+      // revolutions per second
+      var angularSpeed = 0.2; 
+      var lastTime = 0;
+ 
+      // this function is executed on each animation frame
+      function animate(){
+        // update
+        var time = (new Date()).getTime();
+        var timeDiff = time - lastTime;
+        var angleChange = angularSpeed * timeDiff * 2 * Math.PI / 1000;
+        cube.rotation.y += angleChange;
+        lastTime = time;
+ 
+        // render
+        renderer.render(scene, camera);
+ 
+        // request new frame
+        requestAnimationFrame(function(){
+            animate();
+        });
+      }
+
+      // renderer
+      var renderer = new THREE.WebGLRenderer();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      document.body.appendChild(renderer.domElement);
+ 
+      // camera
+      var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 1000);
+      camera.position.z = 500;
+ 
+      // scene
+      var scene = new THREE.Scene();
+                
+      // cube
+      var cube = new THREE.Mesh(new THREE.CubeGeometry(200, 200, 200), new THREE.MeshNormalMaterial());
+      cube.overdraw = true;
+      scene.add(cube);
+ 
+      // start animation
+      animate();
+    </script>
+  </body>
+</html>
