@@ -13,7 +13,7 @@
 	<body>
 		<canvas id="canvas" width="1000" height="25" style="display: block;"></canvas>
 
-		<script type="text/javascript" src="http://stratus.sc/stratus.js"></script>
+	
 
 		<script src="js/three.js"></script>
 		<script src="js/jquery.js"></script>
@@ -76,6 +76,19 @@
 						scene.add(mesh[i]);
 				}
 			
+				//add a big containing object
+				world_geometry = new THREE.IcosahedronGeometry(5000, 1);
+				world_material = new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: get_random_color(), ambient: 0xffffff,  specular: 0x111111, shininess: 33.4, side: THREE.BackSide});
+
+				world_material2 = new THREE.MeshPhongMaterial({shading: THREE.FlatShading, color: get_random_color(), ambient: 0xffffff,  specular: 0x111111, shininess: 33.4, side: THREE.BackSide});
+
+				world_mesh = new THREE.Mesh(world_geometry, world_material);
+				world_mesh2 = new THREE.Mesh(world_geometry, world_material2);
+
+				world_mesh.receiveShadow = true;
+				world_mesh2.receiveShadow = true;
+				scene.add(world_mesh);
+				scene.add(world_mesh2);
 				
 
 				bg = document.body.style;
@@ -83,10 +96,18 @@
 
 				renderer.shadowMapEnabled = true;
 
-				directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-				directionalLight.position.set( 0, 40, 40 );
+				directionalLight = new THREE.DirectionalLight("white", 1);
+				directionalLight.position.set( 0, 1000, 1000 );
 				directionalLight.castShadow = true;
 				scene.add( directionalLight );
+
+				directionalLight2 = new THREE.DirectionalLight(get_random_color(), .60);
+				directionalLight2.position.set( 0, -1000, 1000 );
+				directionalLight2.castShadow = true;
+				scene.add( directionalLight2 );
+
+				// ambientLight = new THREE.AmbientLight( "#484848" );
+				// scene.add( ambientLight );
 
 				
 				
@@ -110,10 +131,23 @@
 
 			function draw() {
 
+				 // revolutions per second
+	      var angularSpeed = .2; 
+	      var lastTime = 0;
+
 				requestAnimationFrame( draw );
 				
 				// experiment with code from the snippets menu here
-				camera.rotation.y = camera.rotation.x = camera.rotation.z = Date.now() * 0.0005;	
+				camera.rotation.y = camera.rotation.x = camera.rotation.z = Date.now() * 0.0002;	
+
+				// update
+        var time = (new Date()).getTime();
+        var timeDiff = time - lastTime;
+        var angleChange = angularSpeed  * 2 * Math.PI / 1000;
+        world_mesh2.rotation.x += angleChange;
+        world_mesh2.rotation.y += angleChange;
+        world_mesh2.rotation.z += angleChange;
+        lastTime = time;
 
 				renderer.render( scene, camera );
 
