@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<style>
+			body {
+				background-color: #ffffff;
+				margin: 0;
+				overflow: hidden;
+			}
+			#yourPlayerId {
+				position: fixed;
+				top: 10px;
+				left: 10px;
+				background-color: white;
+				width: 200px;
+				height: 100px;
+			}
+			#soundcloud {
+				position: absolute;
+				top:10px;
+				left: 10px;
+				width: 200px;
+				height: 70px;
+				background-color: grey;
+				padding: 5px;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- <canvas id="canvas" width="1000" height="0" style="display: block;"></canvas>	 -->
+
+		<script src="js/three.js"></script>
+		<script src="js/jquery.js"></script>
+		<script src="js/soundcloud.js"></script>
+
+		<script src="http://brangerbriz.net/labs/threejs_playGnd/js/Detector.js"></script>
+		<script src="http://connect.soundcloud.com/sdk.js"></script>
+
+
+
+		<div id="soundcloud">
+			Current Track
+		</div>
+	</body>
+
+			<script>
+
+
+			// if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
+			
+			var camera, scene, renderer;
+			var geometry, material, mesh;
+
+
+			function setup() {
+
+				var W = window.innerWidth, H = window.innerHeight;
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( W, H );
+				document.body.appendChild( renderer.domElement );
+
+				camera = new THREE.PerspectiveCamera( 50, W/H, 1, 10000 );
+				// camera.position.z = 1000;
+
+				scene = new THREE.Scene();
+
+				//random color generator
+				function get_random_color() {
+				    var letters = '0123456789ABCDEF'.split('');
+				    var color ="#";
+				    for (var i = 0; i < 6; i++ ) {
+				        color += letters[Math.round(Math.random() * 15)];
+				    }
+				    return color;
+				}
+			
+				
+				// Create the music spheres
+				geometry = new THREE.IcosahedronGeometry(20, 1);
+			
+
+				mesh = [];
+				for ( var i = 0; i <256; i++) {
+						material = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: get_random_color() , transparent: true, opacity: 0.85, shininess: 1});
+
+						mesh[i] = new THREE.Mesh(geometry, material);
+						mesh[i].scale.x = mesh[i].scale.y = mesh[i].scale.z = 1.20;
+
+						mesh[i].position.x = 4000 * Math.random() - 2000;
+						mesh[i].position.y = 4000 * Math.random() - 2000;
+						mesh[i].position.z = 4000 * Math.random() - 2000;
+	
+						mesh[i].rotation.x = 1.59;
+						mesh[i].rotation.y = 0.62;
+						mesh[i].rotation.z = 0.44;
+
+						mesh[i].castShadow = true;
+						mesh[i].receiveShadow = true;
+						scene.add(mesh[i]);
+				}
+			
+				//add big containing spheres
+				world_geometry = new THREE.IcosahedronGeometry(5000, 1);
+
+				world_material = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: get_random_color(), ambient: 0xffffff,  specular: 0x111111, shininess: 33.4, side: THREE.BackSide});
+				world_material2 = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: get_random_color(), ambient: 0xffffff,  specular: 0x111111, shininess: 33.4, side: THREE.BackSide});
+
+				world_mesh = new THREE.Mesh(world_geometry, world_material);
+				world_mesh2 = new THREE.Mesh(world_geometry, world_material2);
+
+				world_mesh.receiveShadow = true;
+				world_mesh2.receiveShadow = true;
+
+				scene.add(world_mesh);
+				scene.add(world_mesh2);
+				
+				// bg = document.body.style;
+				// bg.background = '#302584';
+
+				renderer.shadowMapEnabled = true;
+
+				directionalLight = new THREE.DirectionalLight("white", 1);
+				directionalLight.position.set( 0, 1000, 1000 );
+				directionalLight.castShadow = true;
+				directionalLight.shadowDarkness = 0.5;
+				// directionalLight.shadowCameraVisible = true;
+				scene.add( directionalLight );
+
+				directionalLight2 = new THREE.DirectionalLight(get_random_color(), .60);
+				directionalLight2.position.set( 200, -1000, 1000 );
+				directionalLight2.castShadow = true;
+				directionalLight2.shadowDarkness = 0.3;
+				// directionalLight2.shadowCameraVisible = true;
+				scene.add( directionalLight2 );
+			}
+
+			function draw() {
+
+				 // revolutions per second
+	      var angularSpeed = .1; 
+	      var lastTime = 0;
+
+				requestAnimationFrame( draw );
+				
+				// experiment with code from the snippets menu here
+				camera.rotation.y = camera.rotation.x = camera.rotation.z = Date.now() * 0.00012;	
+
+				// I don't see this time thing being used for anything.
+				// update
+        var time = (new Date()).getTime();
+        var timeDiff = time - lastTime;
+        var angleChange = angularSpeed  * 2 * Math.PI / 1000;
+
+        world_mesh2.rotation.x += angleChange;
+        world_mesh2.rotation.y += angleChange;
+        world_mesh2.rotation.z += angleChange;
+
+        lastTime = time;
+
+				renderer.render( scene, camera );
+
+			}
+
+			setup();
+			draw();
+
+
+
+// *********************************************************************
+      // create the audio context (chrome only for now)
+
+      // DOCUMENTATION TO SEARCH.  webkitAudio
+
+	    var context = new webkitAudioContext();
+	    var audioBuffer;
+	    var sourceNode;
+	    var analyser;
+	    var javascriptNode;
+
+	    // get the context from the canvas to draw on
+
+	    // var ctx = $("#canvas").get()[0].getContext("2d");
+
+	    // create a gradient for the fill. Note the strange
+	    // offset, since the gradient is calculated based on
+	    // the canvas, not the specific element we draw
+	    // var gradient = ctx.createLinearGradient(0,0,0,300);
+	    // gradient.addColorStop(1,'#000000');
+	    // gradient.addColorStop(0.75,'#ff0000');
+	    // gradient.addColorStop(0.25,'#ffff00');
+	    // gradient.addColorStop(0,'#ffffff');
+
+
+
+	    // load the sound
+	 
+	    // Search Soundcloud
+	    SC.initialize({
+		  client_id: '412859f28f7a7c392119fac501af4f54'
+			});
+			// find all sounds of buskers licensed under 'creative commons share alike'
+			var song_search = "riders on the storm";
+			SC.get('/tracks', { q: song_search, license: 'cc-by-sa' }, function(tracks) {
+			  console.log(tracks);
+			 
+			 	// song = "audio/song2.mp3";
+			  song = tracks[0].stream_url + "?client_id=412859f28f7a7c392119fac501af4f54";
+			  console.log("Song:" + song);
+			  loadSound(song);
+
+			  track_index = 0;
+			  // show title in UI
+			  $("#soundcloud").html(tracks[track_index].title);
+			  if (tracks[track_index + 1]) {
+			  	$("#soundcloud").append("<br>Next Track: "+ tracks[track_index + 1].title);
+				  }
+			  $("#soundcloud").append("<br>Total Tracks found: " + tracks.length);
+
+			});
+
+	    setupAudioNodes();
+	    // song="audio/houseofcards.m4a";
+	    // song = "https://api.soundcloud.com/tracks/116866793/stream?client_id=412859f28f7a7c392119fac501af4f54";
+	  
+	    function setupAudioNodes() {
+
+	        // setup a javascript node
+	        javascriptNode = context.createJavaScriptNode(2048, 1, 1);
+	        // connect to destination, else it isn't called
+	        javascriptNode.connect(context.destination);
+
+	        // setup a analyzer
+	        analyser = context.createAnalyser();
+
+	        //********************************
+	        //Learn about this creatAnalyser.  Smoothing?  fftSize?
+	        analyser.smoothingTimeConstant = 0.3;
+	        analyser.fftSize = 512;
+
+	        // create a buffer source node
+	        sourceNode = context.createBufferSource();
+	        sourceNode.connect(analyser);
+	        analyser.connect(javascriptNode);
+
+	        sourceNode.connect(context.destination);
+	    }
+
+	    // load the specified sound
+	    function loadSound(url) {
+	        var request = new XMLHttpRequest();
+	        request.open('GET', url, true);
+	        request.responseType = 'arraybuffer';
+
+	        // When loaded decode the data
+	        request.onload = function() {
+
+	            // decode the data
+	            context.decodeAudioData(request.response, function(buffer) {
+	                // when the audio is decoded play the sound
+	                playSound(buffer);
+	            }, onError);
+	        }
+	        request.send();
+	    }
+
+
+	    function playSound(buffer) {
+	        sourceNode.buffer = buffer;
+	        sourceNode.noteOn(0);
+	    }
+
+	    // log if an error occurs
+	    function onError(e) {
+	        console.log(e);
+	    }
+
+	    // when the javascript node is called
+	    // we use information from the analyzer node
+	    // to draw the volume
+	    javascriptNode.onaudioprocess = function() {
+
+	        // get the average for the first channel
+	        var array =  new Uint8Array(analyser.frequencyBinCount);
+	        analyser.getByteFrequencyData(array);
+
+	        // clear the current state
+	        // ctx.clearRect(0, 0, 1000, 325);
+
+	        // set the fill style
+	        // ctx.fillStyle=gradient;
+	        drawSpectrum(array);
+
+	    }
+
+	    // Animate the music spheres with music array.
+	    function drawSpectrum(array) {
+	    		
+
+	        for ( var i = 0; i < (array.length); i++ ){
+	            var value = array[i];
+
+	            // ctx.fillRect(i*5,325-value,3,325);
+	            
+              // cube.rotation.z += value/2000;
+              scale = value/17;
+              if (scale != 0 ) {
+                  //cube.scale.set(scale,scale,scale);
+  
+                  mesh[i].scale.set(scale, scale, scale);
+
+              }
+              // cube.scale = value/2000;
+              // cube.CubeGeometry.set(value, value, value);
+              // cube.material.color.setHex( 0xffffff );
+              // cubewidth = value;
+              // console.log(scale);
+    	           
+	        }
+	    };
+
+
+		</script>
+
+</html>

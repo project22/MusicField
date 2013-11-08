@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset=utf-8 />
+<title>JS Bin</title>
+</head>
+<body>
+  
+  <script type="text/javascript">
+  	var context = new webkitAudioContext(),
+    audio = new Audio(),
+    source,
+    // `stream_url` you'd get from 
+    // requesting http://api.soundcloud.com/tracks/6981096.json
+    url = 'https://api.soundcloud.com/tracks/116866793/stream?client_id=412859f28f7a7c392119fac501af4f54';
+		// https://api.soundcloud.com/tracks/116866793/stream?client_id=412859f28f7a7c392119fac501af4f54
+
+		audio.src = url;
+		source = context.createMediaElementSource(audio);
+		source.connect(context.destination);
+		source.mediaElement.play();
+  </script>
+</body>
+</html>

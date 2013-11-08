@@ -11,9 +11,7 @@
 		</style>
 	</head>
 	<body>
-		<canvas id="canvas" width="1000" height="25" style="display: block;"></canvas>
-
-	
+		<canvas id="canvas" width="1000" height="0" style="display: block;"></canvas>	
 
 		<script src="js/three.js"></script>
 		<script src="js/jquery.js"></script>
@@ -56,6 +54,10 @@
 				// material = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: 0xfa1313, transparent: true, opacity: 0.80, shininess: 90});
 
 				//Make all the diamonds
+				// map = THREE.ImageUtils.loadTexture('images/rose.jpg');
+				// map.wrapS = map.wrapT = THREE.RepeatWrapping;
+				// map.repeat.set( 10, 10 );
+
 				mesh = [];
 				for ( var i = 0; i <256; i++) {
 						material = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: get_random_color() , transparent: true, opacity: 0.80, shininess: 1});
