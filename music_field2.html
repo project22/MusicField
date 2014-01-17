@@ -21,37 +21,32 @@
 				top:10px;
 				left: 10px;
 				width: 200px;
-				height: 70px;
+				
 				background-color: grey;
 				padding: 5px;
 			}
 		</style>
-	</head>
-	<body>
-		<!-- <canvas id="canvas" width="1000" height="0" style="display: block;"></canvas>	 -->
-
 		<script src="js/three.js"></script>
 		<script src="js/jquery.js"></script>
 		<script src="js/soundcloud.js"></script>
-
 		<script src="http://brangerbriz.net/labs/threejs_playGnd/js/Detector.js"></script>
 		<script src="http://connect.soundcloud.com/sdk.js"></script>
-
-
-
+	</head>
+	<body>
 		<div id="soundcloud">
-			Current Track
+			<div>
+				<button id="start_music">Play</button>
+			<button id="stop_music">Stop</button>
+			</div>	
 		</div>
 	</body>
 
 			<script>
 
-
 			// if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 			
 			var camera, scene, renderer;
 			var geometry, material, mesh;
-
 
 			function setup() {
 
@@ -82,7 +77,13 @@
 
 				mesh = [];
 				for ( var i = 0; i <256; i++) {
-						material = new THREE.MeshLambertMaterial({shading: THREE.FlatShading, color: get_random_color() , transparent: true, opacity: 0.85, shininess: 1});
+						material = new THREE.MeshPhongMaterial({
+							shading: THREE.FlatShading, 
+							color: get_random_color() , 
+							transparent: true, 
+							opacity: 0.85, 
+							specular: 0x050505,
+							shininess: 100});
 
 						mesh[i] = new THREE.Mesh(geometry, material);
 						mesh[i].scale.x = mesh[i].scale.y = mesh[i].scale.z = 1.20;
@@ -170,27 +171,11 @@
 // *********************************************************************
       // create the audio context (chrome only for now)
 
-      // DOCUMENTATION TO SEARCH.  webkitAudio
-
 	    var context = new webkitAudioContext();
 	    var audioBuffer;
 	    var sourceNode;
 	    var analyser;
 	    var javascriptNode;
-
-	    // get the context from the canvas to draw on
-
-	    // var ctx = $("#canvas").get()[0].getContext("2d");
-
-	    // create a gradient for the fill. Note the strange
-	    // offset, since the gradient is calculated based on
-	    // the canvas, not the specific element we draw
-	    // var gradient = ctx.createLinearGradient(0,0,0,300);
-	    // gradient.addColorStop(1,'#000000');
-	    // gradient.addColorStop(0.75,'#ff0000');
-	    // gradient.addColorStop(0.25,'#ffff00');
-	    // gradient.addColorStop(0,'#ffffff');
-
 
 
 	    // load the sound
@@ -211,7 +196,7 @@
 
 			  track_index = 0;
 			  // show title in UI
-			  $("#soundcloud").html(tracks[track_index].title);
+			  $("#soundcloud").append(tracks[track_index].title);
 			  if (tracks[track_index + 1]) {
 			  	$("#soundcloud").append("<br>Next Track: "+ tracks[track_index + 1].title);
 				  }
@@ -258,7 +243,10 @@
 	            // decode the data
 	            context.decodeAudioData(request.response, function(buffer) {
 	                // when the audio is decoded play the sound
-	                playSound(buffer);
+	                // playSound(buffer);
+	                $("#start_music").click(function(){
+							    	playSound(buffer);
+							    });
 	            }, onError);
 	        }
 	        request.send();
@@ -269,6 +257,8 @@
 	        sourceNode.buffer = buffer;
 	        sourceNode.noteOn(0);
 	    }
+
+
 
 	    // log if an error occurs
 	    function onError(e) {
@@ -321,5 +311,4 @@
 
 
 		</script>
-
 </html>
